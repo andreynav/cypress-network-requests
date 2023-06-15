@@ -1,7 +1,9 @@
 describe("Network Requests", () => {
     beforeEach(() => {
         cy.visit("https://example.cypress.io/commands/network-requests");
-    });
+    })
+
+    let message = "bad request"
 
     it("Get Request with intercept", () => {
         cy.intercept({
@@ -50,6 +52,23 @@ describe("Network Requests", () => {
             expect(response.body).to.have.property( 'name','Using POST in cy.intercept()')
             expect(response.body).to.have.property( 'email','hello@cypress.io')
         })
+    })
 
+    it("Put Request", () => {
+        cy.intercept({
+                method: "PUT",
+                url: "**/comments/*"
+            },
+            {
+                statusCode: 404,
+                body: { error: message },
+                delay: 500
+            }).as("putComment");
+
+            cy.get('.network-put').click()
+            cy.wait('@putComment').then(({response}) => {
+                expect(response.statusCode).to.eq(404)
+                expect(response.body.error).to.eq(message)
+        })
     })
 })
